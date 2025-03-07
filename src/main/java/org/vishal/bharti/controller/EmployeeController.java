@@ -1,5 +1,6 @@
 package org.vishal.bharti.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class EmployeeController {
     private final EmployeeService service;
 
+    @Autowired
     public EmployeeController(EmployeeService service) {
         this.service = service;
     }
@@ -54,6 +56,16 @@ public class EmployeeController {
     @MutationMapping
     public Mono<EmployeeResponse> addEmployee(@Argument String name, @Argument double salary, @Argument Long departmentId) {
         return service.addEmployee(new Employee(null, name, salary, departmentId));
+    }
+
+    @MutationMapping
+    public Mono<EmployeeResponse> updateEmployee(@Argument Long id, @Argument String name, @Argument double salary, @Argument Long departmentId) {
+        return service.updateEmployee(id, name, salary, departmentId);
+    }
+
+    @MutationMapping
+    public Mono<String> deleteEmployee(@Argument Long id) {
+        return service.deleteEmployee(id);
     }
 }
 

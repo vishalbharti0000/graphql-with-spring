@@ -66,8 +66,40 @@ public class EmployeeService {
                 );
     }
 
+    public Mono<EmployeeResponse> updateEmployee(Long id, String name, Double salary, Long departmentId) {
+        return employeeRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Employee not found!")))
+                .flatMap(employee -> {
+                    // Update employee fields if provided
+                    if (name != null) employee.setName(name);
+                    if (salary != null) employee.setSalary(salary);
+                    if (departmentId != null) employee.setDepartmentId(departmentId);
+
+                    // Save updated employee
+                    return employeeRepository.save(employee);
+                })
+                // Fetch department if departmentId was updated
+                .flatMap(savedEmployee -> getDepartmentById(savedEmployee.getDepartmentId())
+                        .defaultIfEmpty(new Department(null, "Unknown Department"))
+                        .map(department -> EmployeeResponse.builder()
+                                .id(savedEmployee.getId())
+                                .name(savedEmployee.getName())
+                                .salary(savedEmployee.getSalary())
+                                .department(department)
+                                .build())
+                ).log();
+    }
+
 
     public Mono<Department> getDepartmentById(Long departmentId) {
         return departmentRepository.findById(departmentId);
+    }
+
+    public Mono<String> deleteEmployee(Long id) {
+        return employeeRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Employee not found!")))
+                .flatMap(employee -> employeeRepository.delete(employee)
+                        .thenReturn("Employee with ID " + id + " deleted successfully!")
+                );
     }
 }

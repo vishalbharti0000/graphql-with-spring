@@ -18,4 +18,6 @@ type Query {
 
 type Mutation {
     addEmployee(name: String!, salary: Float!, departmentId: ID!): Employee
+    updateEmployee(id: ID!, name: String, salary: Float, departmentId: ID): Employee
+    deleteEmployee(id: ID!): String
 }
